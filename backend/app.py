@@ -1,26 +1,49 @@
 from flask import Flask, request, jsonify
-import joblib
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-model = joblib.load("model.pkl")
+tasks = []
 
 @app.route("/")
 def home():
-    return "Student Performance Predictor API is running"
+    return "Task Manager Backend Running"
+@app.route("/tasks", methods=["GET"])
+def get_tasks():
+    return jsonify(tasks)
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.get_json()
+@app.route("/tasks", methods=["POST"])
+def add_task():
+    data = request.json
 
-    study_hours = float(data["StudyHours"])
-    attendance = float(data["Attendance"])
+    task = {
+        "id": len(tasks) + 1,
+        "taskName": data["taskName"],
+        "status": data["status"],
+        "date": data["date"]
+    }
 
-    prediction = model.predict([[study_hours, attendance]])
+    tasks.append(task)
 
     return jsonify({
-        "PredictedMarks": round(prediction[0], 2)
+        "message": "Task added successfully",
+        "task": task
     })
 
+
+@app.route("/tasks/<int:index>", methods=["DELETE"])
+def delete_task(index):
+
+    if 0 <= index < len(tasks):
+        tasks.pop(index)
+
+        return jsonify({
+            "message": "Task deleted successfully"
+        })
+
+    return jsonify({
+        "error": "Invalid task index"
+    })
 if __name__ == "__main__":
     app.run(debug=True)
