@@ -9,11 +9,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #050d2f, #764ba2);
 }
 
 .card {
-  background: white;
+  background: rgb(208, 235, 153);
   width: 350px;
   padding: 35px;
   border-radius: 15px;
@@ -126,4 +126,34 @@ span {
   .task-form {
     width: auto;
   }
+}button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.task-item {
+  background: white;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+button:hover {
+  opacity: 0.8;
+}
+
+.task-list {
+  margin-top: 20px;
+}
+
+.task-form input,
+.task-form textarea,
+.task-form select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
 }

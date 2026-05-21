@@ -9,6 +9,8 @@ function App() {
 const [taskTitle, setTaskTitle] = useState("");
 const [taskDate, setTaskDate] = useState("");
 const [suggestion, setSuggestion] = useState("");
+const [editingId, setEditingId] = useState(null);
+const [editingText, setEditingText] = useState("");
 
   // Signup data
   const [name, setName] = useState("");
@@ -64,24 +66,42 @@ useEffect(() => {
 
 const generateSuggestion = (text) => {
 
-  if (text.toLowerCase().includes("study")) {
+  const value = text.toLowerCase();
+
+  if (value.includes("study")) {
     setSuggestion("Study for 2 hours");
   }
 
-  else if (text.toLowerCase().includes("gym")) {
+  else if (value.includes("gym")) {
     setSuggestion("Workout for 1 hour");
   }
 
-  else if (text.toLowerCase().includes("project")) {
+  else if (value.includes("project")) {
     setSuggestion("Complete project module");
   }
 
-  else if (text.toLowerCase().includes("assignment")) {
+  else if (value.includes("assignment")) {
     setSuggestion("Finish assignment before deadline");
   }
 
+  else if (value.includes("practice")) {
+    setSuggestion("Practice for 1 hour daily");
+  }
+
+  else if (value.includes("work")) {
+    setSuggestion("Complete work before evening");
+  }
+
+  else if (value.includes("coding")) {
+    setSuggestion("Practice coding for 2 hours");
+  }
+
+  else if (value.includes("exam")) {
+    setSuggestion("Revise important topics");
+  }
+
   else {
-    setSuggestion("");
+    setSuggestion("Stay productive today");
   }
 };
 
@@ -113,6 +133,22 @@ const generateSuggestion = (text) => {
   setTaskTitle("");
   setTaskDate("");
 };
+
+const updateTask = async (id) => {
+  const { error } = await supabase
+    .from("tasks")
+    .update({ taskName: editingText })
+    .eq("id", id);
+
+  if (error) {
+    console.log(error);
+    alert("Update failed");
+  } else {
+    fetchTasks();
+    setEditingId(null);
+  }
+};
+
 const deleteTask = async (id) => {
 
   const { error } = await supabase
@@ -128,7 +164,19 @@ const deleteTask = async (id) => {
     fetchTasks();
   }
 };
+const completeTask = async (id) => {
+  const { error } = await supabase
+    .from("tasks")
+    .update({ status: "Completed" })
+    .eq("id", id);
 
+  if (error) {
+    console.log(error);
+    alert("Error updating task");
+  } else {
+    fetchTasks();
+  }
+};
 
   return (
     <>
@@ -272,7 +320,31 @@ const deleteTask = async (id) => {
 
   {tasks.map((task, index) => (
     <div key={index} className="task-item">
-      <h3>{task.taskName}</h3>
+      {editingId === task.id ? (
+  <>
+    <input
+      value={editingText}
+      onChange={(e) => setEditingText(e.target.value)}
+    />
+
+    <button onClick={() => updateTask(task.id)}>
+      Save
+    </button>
+  </>
+) : (
+  <>
+    <h3>{task.taskName}</h3>
+
+    <button
+      onClick={() => {
+        setEditingId(task.id);
+        setEditingText(task.taskName);
+      }}
+    >
+      Edit
+    </button>
+  </>
+)}
       <p>Status: {task.status}</p>
       <p>Date: {task.date}</p>
 
@@ -280,6 +352,9 @@ const deleteTask = async (id) => {
       Delete
     </button>
 
+<button onClick={() => completeTask(task.id)}>
+  Complete
+</button>
     </div>
   ))}
 </div>
