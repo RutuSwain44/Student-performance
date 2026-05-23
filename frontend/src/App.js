@@ -8,6 +8,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
 const [taskTitle, setTaskTitle] = useState("");
 const [taskDate, setTaskDate] = useState("");
+const [taskCategory, setTaskCategory] = useState("");
 const [suggestion, setSuggestion] = useState("");
 const [editingId, setEditingId] = useState(null);
 const [editingText, setEditingText] = useState("");
@@ -107,13 +108,19 @@ const generateSuggestion = (text) => {
 
  const addTask = async () => {
 
+  if (!taskTitle || !taskDate || !taskCategory) {
+    alert("Please fill all fields");
+    return;
+  }
+
   const { error } = await supabase
     .from("tasks")
     .insert([
       {
         taskName: taskTitle,
         status: "Pending",
-        date: taskDate
+        date: taskDate,
+        category: taskCategory
       }
     ]);
 
@@ -132,6 +139,7 @@ const generateSuggestion = (text) => {
 
   setTaskTitle("");
   setTaskDate("");
+  setTaskCategory("");
 };
 
 const updateTask = async (id) => {
@@ -177,7 +185,38 @@ const completeTask = async (id) => {
     fetchTasks();
   }
 };
+const getRecommendation = () => {
 
+  let counts = {};
+
+  tasks.forEach((task) => {
+
+    if (task.status === "Completed" && task.category) {
+
+      counts[task.category] =
+        (counts[task.category] || 0) + 1;
+    }
+  });
+
+  let topCategory = "";
+  let max = 0;
+
+  for (let category in counts) {
+
+    if (counts[category] > max) {
+
+      max = counts[category];
+      topCategory = category;
+    }
+  }
+
+  if (topCategory) {
+
+    return `You are strong in ${topCategory}. Keep improving your ${topCategory} skills!`;
+  }
+
+  return "Complete tasks to get recommendations";
+};
   return (
     <>
       {page === "login" && (
@@ -265,21 +304,40 @@ const completeTask = async (id) => {
 
           <main className="main">
             <h1>Welcome, {localStorage.getItem("name")}</h1>
+<div className="recommend-box">
 
-            <div className="stats">
-              <div className="box">
-                <h3>Total Tasks</h3>
-                <p>12</p>
-              </div>
-              <div className="box">
-                <h3>Pending</h3>
-                <p>7</p>
-              </div>
-              <div className="box">
-                <h3>Completed</h3>
-                <p>5</p>
-              </div>
-            </div>
+  <h3>🤖 AI Recommendation Engine</h3>
+
+  <p>{getRecommendation()}</p>
+
+</div>
+<div className="stats">
+
+  <div className="box">
+    <h3>Total Tasks</h3>
+    <p>{tasks.length}</p>
+  </div>
+
+  <div className="box">
+    <h3>Pending</h3>
+    <p>
+      {
+        tasks.filter(task => task.status === "Pending").length
+      }
+    </p>
+  </div>
+
+  <div className="box">
+    <h3>Completed</h3>
+    <p>
+      {
+        tasks.filter(task => task.status === "Completed").length
+      }
+    </p>
+  </div>
+
+</div>
+
 
             <div className="task-form">
   <h2>Add New Task</h2>
@@ -306,11 +364,22 @@ const completeTask = async (id) => {
     onChange={(e) => setTaskDate(e.target.value)}
   />
 
-  <select>
-    <option>Low Priority</option>
-    <option>Medium Priority</option>
-    <option>High Priority</option>
-  </select>
+ <select
+  value={taskCategory}
+  onChange={(e) => setTaskCategory(e.target.value)}
+>
+  <option value="">Select Category</option>
+
+  <option value="Coding">Coding</option>
+
+  <option value="Study">Study</option>
+
+  <option value="Gym">Gym</option>
+
+  <option value="Work">Work</option>
+
+  <option value="Exam">Exam</option>
+</select>
 
   <button onClick={addTask}>Add Task</button>
 </div>
@@ -336,26 +405,40 @@ const completeTask = async (id) => {
     <h3>{task.taskName}</h3>
 
     <button
-      onClick={() => {
-        setEditingId(task.id);
-        setEditingText(task.taskName);
-      }}
-    >
-      Edit
-    </button>
+  className="edit-btn"
+  onClick={() => {
+    setEditingId(task.id);
+    setEditingText(task.taskName);
+  }}
+>
+  Edit
+</button>
   </>
 )}
       <p>Status: {task.status}</p>
       <p>Date: {task.date}</p>
+      <p>Category: {task.category}</p>
+<div className="task-buttons">
 
-      <button onClick={() => deleteTask(task.id)}>
-      Delete
-    </button>
 
-<button onClick={() => completeTask(task.id)}>
-  Complete
-</button>
+  <button
+    className="delete-btn"
+    onClick={() => deleteTask(task.id)}
+  >
+    Delete
+  </button>
+
+  <button
+    className="complete-btn"
+    onClick={() => completeTask(task.id)}
+  >
+    Complete
+  </button>
+
+</div>
     </div>
+
+
   ))}
 </div>
           </main>
