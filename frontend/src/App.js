@@ -6,9 +6,11 @@ import { supabase } from "./supabase";
 function App() {
   const [page, setPage] = useState("login");
   const [tasks, setTasks] = useState([]);
+  const [search, setSearch] = useState("");
 const [taskTitle, setTaskTitle] = useState("");
 const [taskDate, setTaskDate] = useState("");
 const [taskCategory, setTaskCategory] = useState("");
+const [taskDescription, setTaskDescription] = useState("");
 const [suggestion, setSuggestion] = useState("");
 const [editingId, setEditingId] = useState(null);
 const [editingText, setEditingText] = useState("");
@@ -118,9 +120,10 @@ const generateSuggestion = (text) => {
     .insert([
       {
         taskName: taskTitle,
-        status: "Pending",
-        date: taskDate,
-        category: taskCategory
+  description: taskDescription,
+  status: "Pending",
+  date: taskDate,
+  category: taskCategory
       }
     ]);
 
@@ -140,6 +143,7 @@ const generateSuggestion = (text) => {
   setTaskTitle("");
   setTaskDate("");
   setTaskCategory("");
+  setTaskDescription("");
 };
 
 const updateTask = async (id) => {
@@ -191,8 +195,10 @@ const getRecommendation = () => {
 
   tasks.forEach((task) => {
 
-    if (task.status === "Completed" && task.category) {
-
+    if (
+      task.status === "Completed" &&
+      task.category
+    ) {
       counts[task.category] =
         (counts[task.category] || 0) + 1;
     }
@@ -210,12 +216,27 @@ const getRecommendation = () => {
     }
   }
 
-  if (topCategory) {
-
-    return `You are strong in ${topCategory}. Keep improving your ${topCategory} skills!`;
+  if (topCategory === "Coding") {
+    return "You complete many Coding tasks. Practice DSA daily!";
   }
 
-  return "Complete tasks to get recommendations";
+  else if (topCategory === "Study") {
+    return "You are doing great in Study. Keep learning consistently!";
+  }
+
+  else if (topCategory === "Gym") {
+    return "Great fitness consistency! Maintain your Gym routine!";
+  }
+
+  else if (topCategory === "Work") {
+    return "You are productive in Work tasks. Keep improving!";
+  }
+
+  else if (topCategory === "Exam") {
+    return "Exam preparation is going well. Revise daily!";
+  }
+
+  return "Complete tasks to get AI recommendations";
 };
   return (
     <>
@@ -299,7 +320,14 @@ const getRecommendation = () => {
             <p>Dashboard</p>
             <p>My Tasks</p>
             <p>Completed</p>
-            <p onClick={() => setPage("login")}>Logout</p>
+            <p
+  onClick={() => {
+    alert("Logged out successfully");
+    setPage("login");
+  }}
+>
+  Logout
+</p>
           </aside>
 
           <main className="main">
@@ -356,7 +384,11 @@ const getRecommendation = () => {
     AI Suggestion: {suggestion}
   </p>
 )}
-  <textarea placeholder="Task Description"></textarea>
+  <textarea
+  placeholder="Task Description"
+  value={taskDescription}
+  onChange={(e) => setTaskDescription(e.target.value)}
+></textarea>
 
   <input
     type="date"
@@ -385,9 +417,22 @@ const getRecommendation = () => {
 </div>
 
 <div className="task-list">
+  <input
+  type="text"
+  placeholder="Search Task..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="search-box"
+/>
   <h2>My Tasks</h2>
 
-  {tasks.map((task, index) => (
+  {tasks
+  .filter((task) =>
+    task.taskName
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  )
+  .map((task, index) => (
     <div key={index} className="task-item">
       {editingId === task.id ? (
   <>
@@ -416,6 +461,7 @@ const getRecommendation = () => {
   </>
 )}
       <p>Status: {task.status}</p>
+      <p>Description: {task.description}</p>
       <p>Date: {task.date}</p>
       <p>Category: {task.category}</p>
 <div className="task-buttons">
@@ -442,6 +488,9 @@ const getRecommendation = () => {
   ))}
 </div>
           </main>
+          <footer className="footer">
+  <p>Developed by Rutuparna Swain </p>
+</footer>
         </div>
       )}
     </>

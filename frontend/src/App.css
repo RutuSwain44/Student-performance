@@ -220,3 +220,18 @@ button:hover {
 .card button:hover {
   opacity: 0.9;
 }
+.search-box {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+.footer {
+  text-align: center;
+  padding: 7px;
+  background: #153a4aea;
+  color: white;
+  margin-top: auto;
+}
